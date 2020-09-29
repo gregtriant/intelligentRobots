@@ -98,13 +98,42 @@ class Navigation:
         ######################### NOTE: QUESTION  ##############################
         # What if a later subtarget or the end has been reached before the 
         # next subtarget? Alter the code accordingly.
+        
+
+        # CHALLENGE 5
+
+        # If the robot is in the starting point it immediately sets the next subtarget
+        if self.next_subtarget == 0:
+            self.next_subtarget += 1
+            self.counter_to_next_sub = self.count_limit
+        else:
+            # Check if there is a later subtarget, closer than the next one
+            # If one is found, make it the next subtarget and update the time
+            for i in range( self.next_subtarget + 1, len(self.subtargets) - 1 ):
+                # Find the distance between the robot pose and the later subtarget
+                dist_from_later = math.hypot(\
+                    rx - self.subtargets[i][0], \
+                    ry - self.subtargets[i][1])
+                if dist_from_later < 15:
+                    self.next_subtarget = i
+                    self.counter_to_next_sub = self.count_limit + 100
+                    dist = dist_from_later
+                    break
+
+            # If distance from subtarget is less than 5, go to the next one
+            if dist < 5:
+                self.next_subtarget += 1
+                self.counter_to_next_sub = self.count_limit
+                # Check if the final subtarget has been approached
+                if self.next_subtarget == len(self.subtargets):
+                    self.target_exists = False
         # Check if distance is less than 7 px (14 cm)
-        if dist < 5:
-          self.next_subtarget += 1
-          self.counter_to_next_sub = self.count_limit
+        #if dist < 5:
+         # self.next_subtarget += 1
+          #self.counter_to_next_sub = self.count_limit
           # Check if the final subtarget has been approached
-          if self.next_subtarget == len(self.subtargets):
-            self.target_exists = False
+          #if self.next_subtarget == len(self.subtargets):
+           # self.target_exists = False
         ########################################################################
         
         # Publish the current target
@@ -157,13 +186,13 @@ class Navigation:
         # We are good to continue the exploration
         # Make this true in order not to call it again from the speeds assignment
         self.target_exists = True
-              
+
         # Gets copies of the map and coverage
         local_ogm = self.robot_perception.getMap()
         local_ros_ogm = self.robot_perception.getRosMap()
         local_coverage = self.robot_perception.getCoverage()
         print "Got the map and Coverage"
-        self.path_planning.setMap(local_ros_ogm) 
+        self.path_planning.setMap(local_ros_ogm)
 
         # Once the target has been found, find the path to it
         # Get the global robot pose
@@ -216,27 +245,71 @@ class Navigation:
         # may not be desired for coverage-based exploration
         ########################################################################
 
+        # Extra CHALLENGE 1
+        weight_data = 0.5   # How much weight to update the data (a)
+        weight_smooth = 0.1 # How much weight to smooth the coordinates (b)
+        min_change = 0.0001 # Minimum change per iteration to keep iterating
+        new_path = np.copy(np.array(self.path))
+        path_length = len(self.path[0])
+        change = min_change
+        while change >= min_change:
+            change = 0.0
+            for i in range(1, len(new_path)-1):
+                for j in range(path_length):
+                    # Initialize x, y
+                    x_i = self.path[i][j]
+                    y_i = new_path[i][j]
+                    y_prev = new_path[i-1][j]
+                    y_next = new_path[i+1][j]
+
+                    y_i_saved = y_i
+                    # Minimize the distance between coordinates of the original
+                    # path (y) and the smoothed path (x). Also minimize the 
+                    # difference between the coordinates of the smoothed path 
+                    # at time step i, and neighboring time steps. In order to do
+                    # all the minimizations, we use Gradient Ascent.
+                    y_i += weight_data * (x_i-y_i) + weight_smooth * (y_next + y_prev - (2*y_i))
+                    new_path[i][j] = y_i
+
+                    change += abs(y_i - y_i_saved)
+
+        self.path = new_path
+        
+        # Break the path to subgoals every 2 pixels (1m = 20px)
+        step = 1
+        n_subgoals = (int) (len(self.path)/step)
+        self.subtargets = []
+        for i in range(0, n_subgoals):
+          self.subtargets.append(self.path[i * step])
+        self.subtargets.append(self.path[-1])
+        self.next_subtarget = 0
+        print "The path produced " + str(len(self.subtargets)) + " subgoals"
+
+        ########################################################################
         self.counter_to_next_sub = self.count_limit
 
         # Publish the path for visualization purposes
         ros_path = Path()
         ros_path.header.frame_id = "map"
         for p in self.path:
-					ps = PoseStamped()
-					ps.header.frame_id = "map"
-					ps.pose.position.x = 0
-					ps.pose.position.y = 0
-          ######################### NOTE: QUESTION  ##############################
-          # Fill the ps.pose.position values to show the path in RViz
-          # You must understand what self.robot_perception.resolution
-          # and self.robot_perception.origin are.
-					ps.pose.position.x = self.robot_perception.origin['x'] /\
-																									self.robot_perception.resolution
-					ps.pose.position.y = self.robot_perception.origin['y'] /\
-																									self.robot_perception.resolution  
+            ps = PoseStamped()
+            ps.header.frame_id = "map"
+            ps.pose.position.x = 0
+            ps.pose.position.y = 0
+            ######################### NOTE: QUESTION  ##############################
+            # Fill the ps.pose.position values to show the path in RViz
+            # You must understand what self.robot_perception.resolution
+            # and self.robot_perception.origin are.
+
+            # CHALLENGE 2
+
+            ps.pose.position.x = self.robot_perception.origin['x'] /\
+                                    self.robot_perception.resolution
+            ps.pose.position.y = self.robot_perception.origin['y'] /\
+                                    self.robot_perception.resolution  
           
           ########################################################################
-					ros_path.poses.append(ps)
+            ros_path.poses.append(ps)
         self.path_publisher.publish(ros_path)
 
         # Publish the subtargets for visualization purposes
@@ -279,6 +352,8 @@ class Navigation:
         # robot_perception and the next_subtarget [x,y]. From these, you can 
         # compute the robot velocities for the vehicle to approach the target.
         # Hint: Trigonometry is required
+
+        # CHALLENGE 3
 
         if self.subtargets and self.next_subtarget <= len(self.subtargets) - 1:
             st_x = self.subtargets[self.next_subtarget][0]

@@ -41,6 +41,8 @@ class TargetSelection:
         # following tools: ogm_limits, Brushfire field, OGM skeleton,
         # topological nodes.
 
+        # CHALLENGE 6
+
         # Find only the useful boundaries of OGM. Only there calculations
         # have meaning
         ogm_limits = OgmOperations.findUsefulBoundaries(init_ogm, origin, resolution)
@@ -85,6 +87,13 @@ class TargetSelection:
         # Random point
         if self.method == 'random' or force_random == True:
           target = self.selectRandomTarget(ogm, coverage, brush, ogm_limits)
+        
+        # CHALLENGE 6
+        # ADDED
+        else:
+            x = robot_pose['x_px'] + abs(origin['x'] / resolution)
+            y = robot_pose['y_px'] + abs(origin['y'] / resolution)
+            target = self.TargetSel(ogm, coverage, brush, ogm_limits, nodes, x, y)    
         ########################################################################
 
         return target
