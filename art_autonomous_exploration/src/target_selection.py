@@ -85,7 +85,7 @@ class TargetSelection:
         )
     
         # Random point
-        if self.method == 'random' or force_random == True:
+        if self.method == 'random' and force_random == True:
           target = self.selectRandomTarget(ogm, coverage, brush, ogm_limits)
         
         # CHALLENGE 6
@@ -114,3 +114,28 @@ class TargetSelection:
             Print.ORANGE)
         return next_target
 
+
+    def TargetSel(self, ogm, coverage, brushogm, ogm_limits, nodes, x, y):
+        tinit=time.time()
+        next_target=[0,0]
+        a=[]
+        b=[]
+        d=[]
+        print(x)
+        print(y)
+        for n in nodes:
+            #The min distance topo node from robot
+            #temp=-(math.pow(x-n[0],2)+math.pow(y-n[1],2))
+            #The max distance topo node from robot
+            temp=(math.pow(x-n[0],2)+math.pow(y-n[1],2))
+            a.append(temp)
+            b.append(n[0])
+            d.append(n[1])
+
+        c=a.index(max(a))
+        next_target=[b[c],d[c]]
+        
+        Print.art_print("Select target time: " + str(time.time() - tinit), \
+                Print.ORANGE)
+        print(next_target)
+        return next_target

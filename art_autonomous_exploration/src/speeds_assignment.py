@@ -69,10 +69,7 @@ class RobotController:
       scan = self.laser_aggregation.laser_scan
       linear  = 0
       angular = 0
-
-      
-
-              
+ 
       
       ############################### NOTE QUESTION ############################
       # Check what laser_scan contains and create linear and angular speeds
@@ -86,19 +83,19 @@ class RobotController:
       for i in range(222,444):
         scan1.append(scan[i])
 				#scan[i]=scan[i]/(abs(len(scan)/2-i+0.01)/len(scan))
-        linear=math.tanh(min(scan1[:])-0.3)*0.3
+        linear = math.tanh(min(scan1[:]) - 0.3) * 0.3
       
       for i in range(37,185):
         scan2.append(scan[i])
-        angular1=(1-math.tanh(min(scan2[:])-0.3))*0.3
+        angular1 = (1 - math.tanh(min(scan2[:]) - 0.3)) * 0.3
 	  	
-      for i in range(len(scan)-185,len(scan)-37):
+      for i in range(len(scan) - 185, len(scan) - 37):
         scan3.append(scan[i])
-        angular2=(-1+math.tanh(min(scan3[:])-0.3))*0.3
-        if abs(angular1)>=abs(angular2):
-          angular=angular1
+        angular2 = (-1 + math.tanh(min(scan3[:]) - 0.3)) * 0.3
+        if abs(angular1) >= abs(angular2):
+          angular = angular1
         else:
-          angular=angular2      
+          angular = angular2      
 			##########################################################################
     	return [linear, angular]
 
@@ -138,12 +135,12 @@ class RobotController:
         # CHALLENGE 4
 
         scan = self.laser_aggregation.laser_scan     
-        if abs(l_laser)>0.05 and abs(a_laser)<0.25:
+        if abs(l_laser) > 0.05 and abs(a_laser) < 0.25:
           self.linear_velocity = l_goal
           self.angular_velocity = a_goal
         else:
-          self.linear_velocity = 0.65*l_laser+0.35*l_goal
-          self.angular_velocity = 0.65*a_laser+0.35*a_goal 
+          self.linear_velocity = 0.65 * l_laser + 0.35 * l_goal
+          self.angular_velocity = 0.65 * a_laser + 0.35 * a_goal 
 				##########################################################################
       else:
         ############################### NOTE QUESTION ############################
@@ -152,8 +149,8 @@ class RobotController:
 
         # CHALLENGE 1 part2
 
-				self.linear_velocity=l_laser
-				self.angular_velocity=a_laser        
+				self.linear_velocity = l_laser
+				self.angular_velocity = a_laser        
 				pass
         ##########################################################################
 
