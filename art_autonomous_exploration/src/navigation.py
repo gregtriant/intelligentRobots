@@ -302,12 +302,9 @@ class Navigation:
             # and self.robot_perception.origin are.
 
             # CHALLENGE 2
-
-            ps.pose.position.x = self.robot_perception.origin['x'] /\
-                                    self.robot_perception.resolution
-            ps.pose.position.y = self.robot_perception.origin['y'] /\
-                                    self.robot_perception.resolution  
-          
+            ps.pose.position.x = self.robot_perception.origin['x'] + p[0]*self.robot_perception.resolution
+            ps.pose.position.y = self.robot_perception.origin['y'] + p[1]*self.robot_perception.resolution
+                      
           ########################################################################
             ros_path.poses.append(ps)
         self.path_publisher.publish(ros_path)
