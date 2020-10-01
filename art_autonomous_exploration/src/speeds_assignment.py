@@ -114,7 +114,7 @@ class RobotController:
       #   else:
       #     angular = angular2      
 			# ##########################################################################
-    	return [linear, angular]
+    	return [linearCor, angularCor]
 
     # Combines the speeds into one output using a motor schema approach
     def produceSpeeds(self):
