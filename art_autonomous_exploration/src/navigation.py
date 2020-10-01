@@ -334,7 +334,7 @@ class Navigation:
 
     def velocitiesToNextSubtarget(self):
         
-        [linear, angular] = [0, 0]
+        [linearPath, angularPath] = [0, 0]
         
         [rx, ry] = [\
             self.robot_perception.robot_pose['x_px'] - \
@@ -355,29 +355,31 @@ class Navigation:
         if self.subtargets and self.next_subtarget <= len(self.subtargets) - 1:
             st_x = self.subtargets[self.next_subtarget][0]
             st_y = self.subtargets[self.next_subtarget][1]
-            # angular and linear velocities are calculated upon the
-            # math types presented at 9.exploration_target_selection.pdf
-            dtheta = math.degrees(math.atan2(st_y - ry, st_x - rx)) - math.degrees(theta)
+            
+            delta_theta = math.atan2(st_y - ry, st_x - rx) - theta
+            qtPie = math.pi # for conveniece
 
-            if dtheta >= 0 and dtheta < 180:
-                angular = dtheta / 180
-            elif dtheta > 0 and dtheta >= 180:
-                angular = (dtheta - 2 * 180) / 180
-            elif dtheta <= 0 and dtheta > -180:
-                angular =  dtheta / 180
-            elif dtheta < 0 and dtheta < -180:
-                angular = (dtheta + 2 * 180) / 180
-            #should be angular*0.3 but then the robot moves very slow
-            #and cannot reach the targets within the time set from the timer
-            if angular > 0.3:
-                angular = 0.3
-            elif angular < -0.3:
-                angular = -0.3
+            if delta_theta >= 0 and delta_theta < qtPie:
+                angularPath = delta_theta / qtPie
+            elif delta_theta > 0 and delta_theta >= qtPie:
+                angularPath = (delta_theta - 2 * qtPie) / qtPie
+            elif delta_theta <= 0 and delta_theta > -qtPie:
+                angularPath =  delta_theta / qtPie
+            elif delta_theta < 0 and delta_theta < -qtPie:
+                angularPath = (delta_theta + 2 * qtPie) / qtPie
 
-            # **20 is used to avoid overshoot problem
-            linear = ( (1 - abs(angular))**20 ) * 0.3
+
+            # angularPath *= 0.3
+
+            if angularPath > 0.3:
+                angularPath = 0.3
+            elif angularPath < -0.3:
+                angularPath = -0.3
+
+            # 4th power for less overshoot
+            linearPath = ( (1 - abs(angularPath))**4 ) * 0.3
         ######################### NOTE: QUESTION  ##############################
 
-        return [linear, angular]
+        return [linearPath, angularPath]
 
     

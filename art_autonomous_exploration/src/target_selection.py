@@ -85,7 +85,7 @@ class TargetSelection:
         )
     
         # Random point
-        if self.method == 'random' and force_random == True:
+        if self.method == 'random' or force_random == True:
           target = self.selectRandomTarget(ogm, coverage, brush, ogm_limits)
         
         # CHALLENGE 6
