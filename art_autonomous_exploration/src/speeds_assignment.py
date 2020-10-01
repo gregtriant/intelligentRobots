@@ -77,65 +77,41 @@ class RobotController:
 			
       # CHALLENGE 1 part1
       laz0r = self.laser_aggregation
-      angle_min = self.laser_aggregation.angle_min              # Minimum angle scanned (rad)
-      angle_increment = self.laser_aggregation.angle_increment  # Angle between different scans (rad)
 
-      # scan1 = []
-      # scan2 = []
-      # scan3 = []
-      # linearCorrs = [] #for debugging
-
-      tstPub = rospy.Publisher('test0', Twist, queue_size=10)
       linearCor = 0 
       angularCor = 0 
       for i in range(1,len(scan)):
-        # scan1.append(scan[i])
-				#scan[i]=scan[i]/(abs(len(scan)/2-i+0.01)/len(scan))
-        # linear = math.tanh(min(scan1[:]) - 0.3) * 0.3
-
-        # linearCor -= math.cos(laz0r.angle_min + i* laz0r.angle_increment) / scan[i]**2
-        # angularCor -= math.sin(laz0r.angle_min + i* laz0r.angle_increment) / scan[i]**2
-        linearCor -= math.cos(angle_min + i*angle_increment) / scan[i]**2
-        angularCor -= math.sin(angle_min + i*angle_increment) / scan[i]**2
-
+        angularCor -= math.sin(laz0r.angle_min + i* laz0r.angle_increment) / scan[i]**2
+        if i >= 0.4 * len(scan) and i<= 0.6*len(scan):
+          linearCor -= math.cos(laz0r.angle_min + i* laz0r.angle_increment) / scan[i]**2
+# For testing purposes         
+      tstPub = rospy.Publisher('test0', Twist, queue_size=10)
       tstTwst = Twist()
       tstTwst.linear.x = linearCor
-      tstTwst.linear.y = linearCor/100
+      tstTwst.linear.y = linearCor/60 * 0.3
       tstTwst.linear.z = 0
       tstTwst.angular.x = 0
-      tstTwst.angular.y = angularCor/200
+      tstTwst.angular.y = angularCor/100 * 0.3
       tstTwst.angular.z = angularCor
       tstPub.publish(tstTwst)
+# For testing purposes         
 
-      linearCor = (linearCor / 100) * 0.3
+      linearCor = (linearCor / 60) * 0.3
       angularCor = (angularCor / 100) * 0.3
-      if linearCor >= 0.3 :
-        linearCor = 0.3
-      elif linearCor <= -0.3:
-        linearCor = -0.3
+      
+      linearCor = max(linearCor, -0.3)
 
-      # angular = -linearCor * () 
+      if linearCor >= -0.1:
+        angularCor = math.copysign(linearCor, angularCor) 
+      else: 
+        if angularCor >= 0.3 :
+          angularCor = 0.3
+        elif angularCor <= -0.3:
+          angularCor = -0.3
+        elif abs(angularCor)<=0.04:
+          angularCor *= 3 
 
-      if angularCor >= 0.3 :
-        angularCor = 0.3
-      elif angularCor <= -0.3:
-        angularCor = -0.3
-
-
-      # linearCor = min((max(0,linearCor), 0.3))
-      # angularCor = min((max(-0.3,angularCor), 0.3))
-# 
-      # for i in range(37,185):
-      #   scan2.append(scan[i])
-      #   angular1 = (1 - math.tanh(min(scan2[:]) - 0.3)) * 0.3
-	  	
-      # for i in range(len(scan) - 185, len(scan) - 37):
-      #   scan3.append(scan[i])
-      #   angular2 = (-1 + math.tanh(min(scan3[:]) - 0.3)) * 0.3
-      #   if abs(angular1) >= abs(angular2):
-      #     angular = angular1
-      #   else:
-      #     angular = angular2      
+      
 			# ##########################################################################
       return [linearCor, angularCor]
 
