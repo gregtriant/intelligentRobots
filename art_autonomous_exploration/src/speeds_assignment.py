@@ -77,6 +77,8 @@ class RobotController:
 			
       # CHALLENGE 1 part1
       laz0r = self.laser_aggregation
+      angle_min = self.laser_aggregation.angle_min              # Minimum angle scanned (rad)
+      angle_increment = self.laser_aggregation.angle_increment  # Angle between different scans (rad)
 
       # scan1 = []
       # scan2 = []
@@ -84,24 +86,45 @@ class RobotController:
       # linearCorrs = [] #for debugging
 
       tstPub = rospy.Publisher('test0', Twist, queue_size=10)
-
+      linearCor = 0 
+      angularCor = 0 
       for i in range(1,len(scan)):
         # scan1.append(scan[i])
 				#scan[i]=scan[i]/(abs(len(scan)/2-i+0.01)/len(scan))
         # linear = math.tanh(min(scan1[:]) - 0.3) * 0.3
 
-        linearCor -= math.cos(laz0r.angle_min + i* laz0r.angle_increment) / scan[i]**2
-        angularCor -= math.sin(laz0r.angle_min + i* laz0r.angle_increment) / scan[i]**2
+        # linearCor -= math.cos(laz0r.angle_min + i* laz0r.angle_increment) / scan[i]**2
+        # angularCor -= math.sin(laz0r.angle_min + i* laz0r.angle_increment) / scan[i]**2
+        linearCor -= math.cos(angle_min + i*angle_increment) / scan[i]**2
+        angularCor -= math.sin(angle_min + i*angle_increment) / scan[i]**2
 
       tstTwst = Twist()
       tstTwst.linear.x = linearCor
-      tstTwst.linear.y = 0
+      tstTwst.linear.y = linearCor/100
       tstTwst.linear.z = 0
       tstTwst.angular.x = 0
-      tstTwst.angular.y = 0
+      tstTwst.angular.y = angularCor/200
       tstTwst.angular.z = angularCor
       tstPub.publish(tstTwst)
 
+      linearCor = (linearCor / 100) * 0.3
+      angularCor = (angularCor / 100) * 0.3
+      if linearCor >= 0.3 :
+        linearCor = 0.3
+      elif linearCor <= -0.3:
+        linearCor = -0.3
+
+      # angular = -linearCor * () 
+
+      if angularCor >= 0.3 :
+        angularCor = 0.3
+      elif angularCor <= -0.3:
+        angularCor = -0.3
+
+
+      # linearCor = min((max(0,linearCor), 0.3))
+      # angularCor = min((max(-0.3,angularCor), 0.3))
+# 
       # for i in range(37,185):
       #   scan2.append(scan[i])
       #   angular1 = (1 - math.tanh(min(scan2[:]) - 0.3)) * 0.3
@@ -114,7 +137,7 @@ class RobotController:
       #   else:
       #     angular = angular2      
 			# ##########################################################################
-    	return [linearCor, angularCor]
+      return [linearCor, angularCor]
 
     # Combines the speeds into one output using a motor schema approach
     def produceSpeeds(self):
@@ -166,7 +189,7 @@ class RobotController:
 
         # CHALLENGE 1 part2
 
-				self.linear_velocity = l_laser
+				self.linear_velocity = 0.3 + l_laser
 				self.angular_velocity = a_laser        
 				pass
         ##########################################################################
