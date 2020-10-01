@@ -76,27 +76,44 @@ class RobotController:
       # for obstacle avoidance
 			
       # CHALLENGE 1 part1
+      laz0r = self.laser_aggregation
 
-      scan1 = []
-      scan2 = []
-      scan3 = []
-      for i in range(222,444):
-        scan1.append(scan[i])
+      # scan1 = []
+      # scan2 = []
+      # scan3 = []
+      # linearCorrs = [] #for debugging
+
+      tstPub = rospy.Publisher('test0', Twist, queue_size=10)
+
+      for i in range(1,len(scan)):
+        # scan1.append(scan[i])
 				#scan[i]=scan[i]/(abs(len(scan)/2-i+0.01)/len(scan))
-        linear = math.tanh(min(scan1[:]) - 0.3) * 0.3
-      
-      for i in range(37,185):
-        scan2.append(scan[i])
-        angular1 = (1 - math.tanh(min(scan2[:]) - 0.3)) * 0.3
+        # linear = math.tanh(min(scan1[:]) - 0.3) * 0.3
+
+        linearCor -= math.cos(laz0r.angle_min + i* laz0r.angle_increment) / scan[i]**2
+        angularCor -= math.sin(laz0r.angle_min + i* laz0r.angle_increment) / scan[i]**2
+
+      tstTwst = Twist()
+      tstTwst.linear.x = linearCor
+      tstTwst.linear.y = 0
+      tstTwst.linear.z = 0
+      tstTwst.angular.x = 0
+      tstTwst.angular.y = 0
+      tstTwst.angular.z = angularCor
+      tstPub.publish(tstTwst)
+
+      # for i in range(37,185):
+      #   scan2.append(scan[i])
+      #   angular1 = (1 - math.tanh(min(scan2[:]) - 0.3)) * 0.3
 	  	
-      for i in range(len(scan) - 185, len(scan) - 37):
-        scan3.append(scan[i])
-        angular2 = (-1 + math.tanh(min(scan3[:]) - 0.3)) * 0.3
-        if abs(angular1) >= abs(angular2):
-          angular = angular1
-        else:
-          angular = angular2      
-			##########################################################################
+      # for i in range(len(scan) - 185, len(scan) - 37):
+      #   scan3.append(scan[i])
+      #   angular2 = (-1 + math.tanh(min(scan3[:]) - 0.3)) * 0.3
+      #   if abs(angular1) >= abs(angular2):
+      #     angular = angular1
+      #   else:
+      #     angular = angular2      
+			# ##########################################################################
     	return [linear, angular]
 
     # Combines the speeds into one output using a motor schema approach
