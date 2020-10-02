@@ -91,7 +91,7 @@ class TargetSelection:
 
 
         # Random point
-        if self.method == 'random' or force_random == True:
+        if self.method == 'random' and force_random == True:
           target = self.selectRandomTarget(ogm, coverage, brush, ogm_limits)
         
         # CHALLENGE 6
@@ -122,96 +122,6 @@ class TargetSelection:
         Print.art_print("Select random target time: " + str(time.time() - tinit), \
             Print.ORANGE)
         return next_target
-
-    # def myTargetSelection(self, ogm, coverage, brushogm, ogm_limits, nodes, x_robot, y_robot):
-    #     # The next target in pixels
-    #     tinit = time.time()
-    #     next_target = [0, 0] 
-    #     found = False
-
-    #     dists = []
-    #     w_dist = 0.5
-    #     max_dist = 0
-    #     min_dist = sys.maxint
-
-    #     ogms = []
-    #     w_ogm = 1
-    #     max_ogm = 0
-    #     min_ogm = sys.maxint
-
-    #     brushs = []
-    #     w_brush = 0.5
-    #     max_brush = 0
-    #     min_brush = sys.maxint
-
-    #     totalPoints = []
-    #     max_points = 0
-    #     pos_max = 0
-
-    #     x_positions = []
-    #     y_posotions = []
-
-    #     for n in nodes: # nodes contains all the uncovered points
-    #         x_node = n[0]
-    #         y_node = n[1]
-            
-    #         x_positions.append(n[0])
-    #         y_posotions.append(n[1])
-            
-    #         dist = math.pow(x_robot - x_node, 2) + math.pow(y_robot - y_node, 2)
-    #         dists.append(dist)
-    #         if dist > max_dist:
-    #             max_dist = dist
-    #         if dist < min_dist:
-    #             min_dist = dist
-
-    #         current_ogm = ogm[x_node][y_node]
-    #         ogms.append(current_ogm)
-    #         if current_ogm > max_ogm:
-    #             max_ogm = current_ogm
-    #         if current_ogm < min_ogm:
-    #             min_ogm = current_ogm
-
-    #         brush = brushogm[x_node][y_node]
-    #         brushs.append(brush)
-    #         if brush > max_brush:
-    #             max_brush = brush
-    #         if brush < min_brush:
-    #             min_brush = brush
-    #     Print.art_print("min dist: " + str(min_dist) + " min ogm: " + str(min_ogm) + "  min brush: " + str(min_brush), \
-    #             Print.RED)
-    #     Print.art_print("max dist: " + str(max_dist) + " max ogm: " + str(max_ogm) + "  max brush: " + str(max_brush), \
-    #             Print.RED)
-    #     for i in range(0, len(nodes)):
-            
-    #         # normarilze values from 0 to 1
-    #         dists[i] = self.map(dists[i], min_dist, max_dist, 0, 10)
-    #         ogms[i] = self.map(ogms[i], min_ogm, max_ogm, 0, 10)
-    #         brushs[i] = self.map(brushs[i], min_brush, max_brush, 0, 10)
-            
-            
-    #         # calculate totalPoints for each node using weighted mean
-    #         temp_total = (w_dist * dists[i] + w_ogm * ogms[i] + w_brush * brushs[i]) / (w_dist + w_ogm + w_brush)
-    #         totalPoints.append(temp_total) 
-    #         if totalPoints[i] > max_points:
-    #             max_points = totalPoints[i]
-    #             pos_max = i
-            
-    #         Print.art_print(str(i) + ") dist: " + str(dists[i]) + "  ogm: " + str(ogms[i]) + "  brush: " + str(brushs[i]), \
-    #             Print.RED)
-    #         Print.art_print("TotalPoints: " + str(totalPoints[i]), \
-    #             Print.RED)
-        
-
-    #     Print.art_print("Max points: " + str(totalPoints[pos_max]) + "  at pos: " + str(pos_max) + "  " + str(x_positions[pos_max]) + " , " + str(y_posotions[pos_max]), \
-    #             Print.RED)
-    #     next_target = [ x_positions[pos_max] , y_posotions[pos_max] ]
-        
-
-        
-    #     Print.art_print("Select MYSMART target time: " + str(time.time() - tinit), \
-    #         Print.ORANGE)
-    #     return next_target
 
         
     def MAXTargetSel(self, ogm, coverage, brushogm, ogm_limits, nodes, x, y):
@@ -261,7 +171,4 @@ class TargetSelection:
         return next_target
 
 
-    # def map(self, x, in_min, in_max, out_min, out_max):
-    #     if (in_max == in_min):
-    #         return 0.0
-    #     return ((x - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min
+   
