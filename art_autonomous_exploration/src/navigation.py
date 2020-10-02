@@ -370,14 +370,10 @@ class Navigation:
 
 
             # angularPath *= 0.3
-
-            if angularPath > 0.3:
-                angularPath = 0.3
-            elif angularPath < -0.3:
-                angularPath = -0.3
+            angularPath = min(max(angularPath,-0.3) , 0.3)
 
             # 4th power for less overshoot
-            linearPath = ( (1 - abs(angularPath))**4 ) * 0.3
+            linearPath = ( (1 - abs(angularPath))**8 ) * 0.3
         ######################### NOTE: QUESTION  ##############################
 
         return [linearPath, angularPath]

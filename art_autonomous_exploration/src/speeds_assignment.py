@@ -150,13 +150,20 @@ class RobotController:
 
         # CHALLENGE 4
 
-        scan = self.laser_aggregation.laser_scan     
-        if abs(l_laser) > 0.05 and abs(a_laser) < 0.25:
+        # if abs(l_laser) <= 0.05 and abs(a_laser) < 0.25:
+        #   self.linear_velocity = l_goal
+        #   self.angular_velocity = a_goal
+        # else:
+        #   self.linear_velocity = 0.65 * l_laser + 0.35 * l_goal
+        #   self.angular_velocity = 0.65 * a_laser + 0.35 * a_goal 
+ 
+        if abs(l_laser) <= 0.15:
           self.linear_velocity = l_goal
           self.angular_velocity = a_goal
         else:
-          self.linear_velocity = 0.65 * l_laser + 0.35 * l_goal
-          self.angular_velocity = 0.65 * a_laser + 0.35 * a_goal 
+          self.linear_velocity = l_goal + 0.5* (l_goal / 0.3) * l_laser 
+          self.angular_velocity = a_goal + 0.5* (a_goal / 0.3) * a_laser  
+
 				##########################################################################
       else:
         ############################### NOTE QUESTION ############################
