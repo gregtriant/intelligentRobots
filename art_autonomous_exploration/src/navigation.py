@@ -109,7 +109,8 @@ class Navigation:
         else:
             # Check if there is a later subtarget, closer than the next one
             # If one is found, make it the next subtarget and update the time
-            for i in range( self.next_subtarget + 1, len(self.subtargets) - 1 ):
+            last_worthwhile_subtarget = min(self.next_subtarget + 3, len(self.subtargets) - 1)
+            for i in range( self.next_subtarget + 1, last_worthwhile_subtarget):
                 # Find the distance between the robot pose and the later subtarget
                 dist_from_later = math.hypot(\
                     rx - self.subtargets[i][0], \
@@ -204,28 +205,35 @@ class Navigation:
         # Choose target function
         self.path = []
         force_random = False
+        tries = 0
         while len(self.path) == 0:
-          start = time.time()
-          target = self.target_selection.selectTarget(\
+            
+            start = time.time()
+            target = self.target_selection.selectTarget(\
                     local_ogm,\
                     local_coverage,\
                     self.robot_perception.robot_pose,
                     self.robot_perception.origin,
                     self.robot_perception.resolution, 
-                    force_random)
-          
-          self.path = self.path_planning.createPath(\
-              g_robot_pose,\
-              target,
-              self.robot_perception.resolution)
-          print "Navigation: Path for target found with " + str(len(self.path)) +\
-              " points"
-          if len(self.path) == 0:
+                    force_random,
+                    tries)
+            
+            self.path = self.path_planning.createPath(\
+            g_robot_pose,\
+            target, self.robot_perception.resolution)
+            print "Navigation: Path for target found with " + str(len(self.path)) +\
+            " points"
+            
+            if (tries >= 1 and len(self.path) == 0):
+                Print.art_print(\
+                    "Path planning failed. Fallback to random target selection", \
+                    Print.RED)
+                force_random = True
+            tries = tries + 1
             Print.art_print(\
-                "Path planning failed. Fallback to random target selection", \
-                Print.RED)
-            force_random = True
-          
+                "Path planning Number of tries: " + str(tries), \
+                Print.BLUE)
+
         # Reverse the path to start from the robot
         self.path = self.path[::-1]
 
